@@ -133,14 +133,14 @@ public class GatherRouteExec : IDisposable
 
         CompatModule.EnsureCompatibility(RouteDB);
 
-        if (RouteDB.AutoGather && GatheringAM != null && GatheredItem != null && !Player.InGatheringAnimation)
+        if (RouteDB.AutoGather && GatheringAM is { CurrentIntegrity: > 0 } && GatheredItem is { IsEnabled: true } && !Player.InGatheringAnimation)
         {
             SetState(State.Gathering);
             GatheringActions.UseNextBestAction(GatheringAM, GatheredItem);
             return;
         }
 
-        if (RouteDB.AutoGather && GatheringCollectableAM != null && !Player.InGatheringAnimation)
+        if (RouteDB.AutoGather && GatheringCollectableAM is { CurrentIntegrity: > 0 } && !Player.InGatheringAnimation)
         {
             SetState(State.Gathering);
             GatheringActions.UseNextBestAction(GatheringCollectableAM);

@@ -129,14 +129,18 @@ internal class GatheringActions
         }
         else
         {
-            PluginLog.Information($"Using {GenericHelpers.GetRow<Action>(action)?.Name}");
-            P.TaskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.Action, action));
+            if (ActionManager.Instance()->GetActionStatus(ActionType.Action, action) == 0)
+            {
+                PluginLog.Information($"Using {GenericHelpers.GetRow<Action>(action)?.Name}");
+                P.TaskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.Action, action));
+            }
         }
     }
 
     public static unsafe uint GetNextBestAction(AddonMaster.Gathering am, AddonMaster.Gathering.GatheredItem item)
     {
         if (item.IsCollectable) return 0;
+        if (am.CurrentIntegrity is 0) return 0;
 
         Actions actions = Player.Job == Job.MIN ? new MINActions() : new BTNActions();
 
