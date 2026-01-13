@@ -203,7 +203,13 @@ public unsafe class WorkshopDebug
         var pop = Service.LuminaRow<MJICraftworksPopularity>(index)!;
         foreach (var np in _tree.Node($"{tag} popularity={index}"))
         {
-            _tree.LeafNodes(sheetCraft.Where(o => o.RowId > 0), o => $"{o.RowId} '{o.Item.Value.Name}' = {pop.Value.Popularity[o.Value].Value.Ratio}");
+            _tree.LeafNodes(sheetCraft.Where(o => o.RowId > 0), o =>
+            {
+                if (o.RowId < pop.Value.Popularity.Count)
+                    return $"{o.RowId} '{o.Item.Value.Name}' = {pop.Value.Popularity[(int)o.RowId].Value.Ratio}";
+                else
+                    return $"{o.RowId} '{o.Item.Value.Name}' = (idx={o.RowId} out of range={pop.Value.Popularity.Count - 1}. Please report)";
+            });
         }
     }
 
