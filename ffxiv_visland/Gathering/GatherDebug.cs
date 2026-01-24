@@ -63,10 +63,9 @@ public unsafe class GatherDebug(GatherRouteExec exec)
             ImGuiEx.Text($"IsNode: {GenericHelpers.GetRow<GatheringPoint>(t.BaseId)}");
             ImGuiEx.Text($"GatheringType: {GenericHelpers.GetRow<GatheringPoint>(t.BaseId)!.Value.GatheringPointBase.Value.GatheringType.RowId}");
         }
-        if (exec.CurrentRoute != null && exec.CurrentRoute.TargetGatherItem != default)
+        if (exec.CurrentRoute is { TargetGatherItem: not 0 } && TryGetRow<Item>((uint)exec.CurrentRoute.TargetGatherItem, out var item))
         {
             Utils.DrawSection("Target Item", ImGuiColors.ParsedGold);
-            var item = GenericHelpers.GetRow<Item>((uint)exec.CurrentRoute.TargetGatherItem)!.Value;
             var wp = exec.CurrentRoute.Waypoints[exec.CurrentWaypoint];
             ImGuiEx.Text($"[{exec.CurrentRoute.TargetGatherItem}] {item.Name}");
             ImGuiEx.Text($"Waypoint: IsNode: {wp.IsNode} Type: {wp.GatheringType} NodeJob: {wp.NodeJob}");
@@ -75,12 +74,12 @@ public unsafe class GatherDebug(GatherRouteExec exec)
         {
             Utils.DrawSection("Gathering Addon", ImGuiColors.ParsedGold);
             ImGuiEx.Text($"Integrity: {exec.GatheringAM.CurrentIntegrity}/{exec.GatheringAM.TotalIntegrity}");
-            foreach (var item in exec.GatheringAM.GatheredItems.Where(x => x.IsEnabled))
+            foreach (var gatherable in exec.GatheringAM.GatheredItems.Where(x => x.IsEnabled))
             {
-                ImGuiEx.TextV($@"[{item.ItemID}] Lv{item.ItemLevel} {item.GatherChance}% {item.ItemName} {(item.IsCollectable ? SeIconChar.Collectible : string.Empty)}");
+                ImGuiEx.TextV($@"[{gatherable.ItemID}] Lv{gatherable.ItemLevel} {gatherable.GatherChance}% {gatherable.ItemName} {(gatherable.IsCollectable ? SeIconChar.Collectible : string.Empty)}");
                 ImGui.SameLine();
-                if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.BoreHole, $"###{item.ItemID}"))
-                    item.Gather();
+                if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.BoreHole, $"###{gatherable.ItemID}"))
+                    gatherable.Gather();
             }
         }
         if (exec.GatheredItem != null)
